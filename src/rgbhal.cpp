@@ -1,5 +1,5 @@
 #include "rgbhal.hpp"
-#include "touch.hpp"
+#include "touchhal.hpp"
 
 /*
 I wish to address the specification datasheet provided with the LCD Module.

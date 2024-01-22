@@ -1,4 +1,4 @@
-#include "touch.hpp"
+#include "touchhal.hpp"
 
 int touch_last_x = 0;
 int touch_last_y = 0;

@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef _RGBHAL_
-#define _RGBHAL_
+#ifndef OLED_RGBHAL_HPP
+#define OLED_RGBHAL_HPP
 
 #include <Arduino_GFX_Library.h>
 

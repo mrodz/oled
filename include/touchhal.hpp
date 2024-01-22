@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef _TOUCH_H_
-#define _TOUCH_H_
+#ifndef OLED_TOUCH_H
+#define OLED_TOUCH_H
 
 /*******************************************************************************
  * Touch library:
@@ -31,4 +31,4 @@ bool touch_has_signal();
 bool touch_touched(int16_t width, int16_t height);
 bool touch_released();
 
-#endif // #ifndef _TOUCH_H_
+#endif // #ifndef OLED_TOUCH_H
