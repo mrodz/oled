@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <cstring>
 #include <mbedtls/aes.h>
+#include <lvgl.h>
 
 #include "login.hpp"
 
@@ -19,7 +20,7 @@ unsigned char *encrypt_any_length_string(const char *input, uint8_t *key, uint8_
 	if (padded_input == nullptr)
 	{
 		Serial.println("Failed to allocate memory");
-		return;
+		return nullptr;
 	}
 
 	memcpy(padded_input, input, strlen(input));
@@ -38,18 +39,64 @@ unsigned char *encrypt_any_length_string(const char *input, uint8_t *key, uint8_
 	return encrypt_output;
 }
 
-#define MAX_USERS 4
+User::User() {
+	this->name = nullptr;
+}
 
-User users[MAX_USERS];
-
-User::User(char *name, char *password_hash)
+User::User(const char *name)
 {
-	strncpy(this->name, name, MAX_USERNAME_LEN);
-	this->name[MAX_USERNAME_LEN - 1] = '\0';
+	size_t name_len = strlen(name);
+	char *dst = new char[name_len + 1];
 
-	this->password_hash = password_hash;
+	strncpy(dst, name, name_len);
+
+	this->name = dst;
 }
 
 User::~User() {
-	delete[] this->password_hash;
+	if (this->name != nullptr) {
+		delete[] this->name;
+	}
+}
+
+const char * User::get_name() const {
+	return this->name;
+}
+
+bool User::exists() const {
+	return this->name != nullptr;
+}
+
+lv_obj_t * user_profile(lv_obj_t *parent, const User * user) {
+	lv_obj_t * profile_container = lv_obj_create(parent);
+	static lv_coord_t row_dsc[] = {135, 50, LV_GRID_TEMPLATE_LAST};
+	static lv_coord_t col_dsc[] = {LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST };
+
+	lv_obj_set_grid_dsc_array(profile_container, col_dsc, row_dsc);
+	lv_obj_set_size(profile_container, 200, 250);
+    lv_obj_center(profile_container);
+    lv_obj_set_layout(profile_container, LV_LAYOUT_GRID);
+
+
+	lv_obj_t * pfp = lv_obj_create(profile_container);
+	lv_obj_set_grid_cell(pfp, LV_GRID_ALIGN_CENTER, 0, 1, LV_GRID_ALIGN_CENTER, 0, 1);
+
+	lv_obj_set_size(pfp, 120, 120);
+	lv_obj_center(pfp);
+
+
+	lv_obj_t * label = lv_label_create(profile_container);
+	lv_obj_set_grid_cell(label, LV_GRID_ALIGN_CENTER, 0, 1, LV_GRID_ALIGN_CENTER, 1, 1);
+
+	const char * name;
+
+	if (user->exists()) {
+		name = user->get_name();
+	} else {
+		name = "Empty Profile";
+	}
+
+	lv_label_set_text_fmt(label, "%s " LV_SYMBOL_EDIT, name);
+
+	return profile_container;
 }

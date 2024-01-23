@@ -5,7 +5,7 @@
 #include "rgbhal.hpp"
 #include "sdhal.hpp"
 #include "touchhal.hpp"
-
+#include "login.hpp"
 #include "components/counter.hpp"
 
 #define TFT_BL 2
@@ -61,24 +61,41 @@ void capacitive_touch_driver(lv_indev_drv_t *indev_driver, lv_indev_data_t *data
 	}
 }
 
+App app = App();
+
 void ui_main(lv_obj_t *screen)
 {
-	
-	CounterButton counter_button(screen);
+	static lv_style_t style;
+    lv_style_init(&style);
+    lv_style_set_flex_flow(&style, LV_FLEX_FLOW_ROW_WRAP);
+    lv_style_set_flex_main_place(&style, LV_FLEX_ALIGN_SPACE_AROUND);
+	lv_style_set_flex_track_place(&style, LV_FLEX_ALIGN_CENTER);
+    lv_style_set_layout(&style, LV_LAYOUT_FLEX);
 
-	counter_button.set_pos(Position{50, 50});
+	lv_obj_t * signin_row = lv_obj_create(screen);
+
+	lv_obj_set_size(signin_row, 750, 400);
+    lv_obj_center(signin_row);
+	lv_obj_add_style(signin_row, &style, 0);
+
+	User *dst;
+
+	for (int i = 0; i < PROFILE_C; i++) {
+		(void)app.get_profile(i, &dst);
+		(void)user_profile(signin_row, dst);
+	}
 }
 
 void ui_error(lv_obj_t *screen, const char *message)
 {
 	lv_obj_clean(screen);
 
-    lv_obj_t * cont_col = lv_obj_create(screen);
-    lv_obj_set_flex_flow(cont_col, LV_FLEX_FLOW_COLUMN);
+	lv_obj_t *cont_col = lv_obj_create(screen);
+	lv_obj_set_flex_flow(cont_col, LV_FLEX_FLOW_COLUMN);
 	lv_obj_set_width(cont_col, 600);
 	lv_obj_set_height(cont_col, 400);
 
-	lv_obj_t * title = lv_label_create(cont_col);
+	lv_obj_t *title = lv_label_create(cont_col);
 	lv_label_set_text(title, "An unrecoverable error occured");
 
 	static lv_style_t style_title;
@@ -86,7 +103,7 @@ void ui_error(lv_obj_t *screen, const char *message)
 	lv_style_set_bg_color(&style_title, lv_color_hex(0xFF1111));
 	lv_obj_add_style(title, &style_title, 0);
 
-	lv_obj_t * message_label = lv_label_create(cont_col);
+	lv_obj_t *message_label = lv_label_create(cont_col);
 	lv_label_set_text_fmt(message_label, "%s", message);
 }
 
@@ -133,16 +150,28 @@ void setup(void)
 
 	lv_obj_t *screen = lv_scr_act();
 
-	int sdcard_err = sdcard_init();
+	{ // scoped to allow goto
+		sd_init_err sdcard_err = sdcard_init();
 
-	if (sdcard_err)
-	{
-		ui_error(screen, sdcard_error_message(sdcard_err));
+		if (sdcard_err != SD_INIT_OK)
+		{
+			ui_error(screen, sd_init_err_msg(sdcard_err));
+			goto end;
+		}
+
+		ld_users_err user_setup_err = load_users(&app);
+
+		if (user_setup_err != LD_USERS_OK)
+		{
+			ui_error(screen, ld_users_err_msg(user_setup_err));
+			goto end;
+		}
 	}
-	else
-	{
-		ui_main(screen);
-	}
+
+	ui_main(screen);
+
+end:
+	;
 }
 
 void loop(void)
