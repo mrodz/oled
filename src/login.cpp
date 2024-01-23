@@ -49,6 +49,7 @@ User::User(const char *name)
 	char *dst = new char[name_len + 1];
 
 	strncpy(dst, name, name_len);
+	dst[name_len] = '\0';
 
 	this->name = dst;
 }

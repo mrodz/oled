@@ -80,7 +80,7 @@ void ui_main(lv_obj_t *screen)
 
 	User *dst;
 
-	for (int i = 0; i < PROFILE_C; i++) {
+	for (int i = 0; i < app.profile_count(); i++) {
 		(void)app.get_profile(i, &dst);
 		(void)user_profile(signin_row, dst);
 	}
@@ -94,6 +94,7 @@ void ui_error(lv_obj_t *screen, const char *message)
 	lv_obj_set_flex_flow(cont_col, LV_FLEX_FLOW_COLUMN);
 	lv_obj_set_width(cont_col, 600);
 	lv_obj_set_height(cont_col, 400);
+	lv_obj_center(cont_col);
 
 	lv_obj_t *title = lv_label_create(cont_col);
 	lv_label_set_text(title, "An unrecoverable error occured");

@@ -4,6 +4,7 @@
 #define OLED_LIB_HPP
 
 #include <lvgl.h>
+#include <vector>
 
 #include "login.hpp"
 
@@ -34,13 +35,13 @@ public:
 	void set_size(Dimension size);
 };
 
-#define PROFILE_C 3
-
 class App {
-	User profiles[PROFILE_C];
+	std::vector<User> profiles = {};
 public:
 	App();
+	bool add_profile(size_t index, User user);
 	bool get_profile(size_t index, User **dst);
+	size_t profile_count() const;
 };
 
 #endif // #ifndef OLED_LIB_HPP

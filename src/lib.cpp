@@ -1,3 +1,4 @@
+#include <Arduino.h>
 #include <lvgl.h>
 #include "lib.hpp"
 
@@ -13,14 +14,30 @@ void Component::set_size(Dimension size)
 
 App::App() = default;
 
+size_t App::profile_count() const {
+	return this->profiles.size();
+}
+
 bool App::get_profile(size_t index, User **dst)
 {
-	if (index > 3)
+	Serial.printf("Loading user profile #%u\n", index);
+
+	if (index >= this->profile_count())
 	{
 		return false;
 	}
 
-	*dst = this->profiles + index;
+	*dst = &this->profiles[index];
+
+	return true;
+}
+
+bool App::add_profile(size_t index, User user) {
+	if (index != this->profile_count()) {
+		return false;
+	}
+
+	this->profiles.push_back(user);
 
 	return true;
 }

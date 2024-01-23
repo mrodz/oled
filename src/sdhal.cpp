@@ -36,45 +36,55 @@ const char *sd_init_err_msg(sd_init_err code)
 	return "sd_init_err_msg: Invalid Error Code";
 }
 
-ld_user_cfg_err load_user_config(User * user, const char *username)
+ld_user_cfg_err load_user_config_section(uint8_t index, const char *section, char *dst, size_t dst_capacity, size_t *bytes_written)
 {
-	size_t uname_len = strlen(username);
-	size_t path_len = 5 + uname_len + 5;
-	char *path = new char[path_len];
+	char path[64] = {0};
 
-	if (path == nullptr)
+	if (snprintf(path, sizeof(path), "/usr/%u/data/%s", index, section) < 0)
 	{
-		return LD_USER_CFG_OUT_OF_MEMORY;
-	}
-
-	size_t last_pos;
-
-	if ((last_pos = snprintf(path, sizeof(path), "/usr/%s/data", username)) < 0)
-	{
-		delete[] path;
 		return LD_USER_CFG_FMT_FAIL;
 	}
+
+	Serial.print("path = ");
+	Serial.println(path);
 
 	File attempted_load = SD.open(path);
 
 	if (!attempted_load)
 	{
-		delete[] path;
 		return LD_USER_CFG_FILE_NOT_FOUND;
 	}
 
-	attempted_load.find("nickname:");
-
-	String nickname = attempted_load.readStringUntil('&');
-
-	Serial.printf("nickname = %s", nickname);
-
-	const char *nickname_c_str = nickname.c_str();
-
-	*user = User(nickname_c_str);
+	*bytes_written = attempted_load.readBytes(dst, dst_capacity);
 
 	attempted_load.close();
-	delete[] path;
+
+	return LD_USER_CFG_OK;
+}
+
+ld_user_cfg_err load_user_config(App *app, uint8_t index)
+{
+	char buffer[64] = {0};
+	ld_user_cfg_err err;
+
+	size_t nickname_len;
+	if ((err = load_user_config_section(index, "nickname", buffer, sizeof(buffer), &nickname_len)) != LD_USER_CFG_OK)
+		return err;
+
+	Serial.print("nickname = ");
+	Serial.println(buffer);
+
+	app->add_profile(index, User(buffer));
+
+	memset(buffer, 0, sizeof(buffer));
+
+	User *x;
+
+	app->get_profile(app->profile_count() - 1, &x);
+
+	Serial.print("addr name = \"");
+	Serial.print(x->get_name());
+	Serial.println("\"");
 
 	return LD_USER_CFG_OK;
 }
@@ -99,7 +109,7 @@ ld_users_err load_users(App *app)
 {
 	File user_dir = SD.open("/usr");
 	uint8_t index = 0;
-	while (index < PROFILE_C)
+	while (1)
 	{
 		File entry = user_dir.openNextFile();
 		if (!entry)
@@ -117,16 +127,7 @@ ld_users_err load_users(App *app)
 			return LD_USERS_BAD_DIR;
 		}
 
-		User *tentative_profile;
-		if (!app->get_profile(index, &tentative_profile)) {
-			return LD_USERS_INDEX_OUT_OF_BOUNDS;
-		}
-
-		if (tentative_profile == nullptr) {
-			return LD_USERS_INDEX_OUT_OF_BOUNDS;
-		};
-
-		ld_user_cfg_err config_code = load_user_config(tentative_profile, name);
+		ld_user_cfg_err config_code = load_user_config(app, index);
 
 		entry.close();
 
@@ -149,14 +150,14 @@ const char *ld_users_err_msg(ld_users_err code)
 {
 	switch (code)
 	{
-		case LD_USERS_BAD_DIR:
-			return "There was an unexpected file in the `/usr` directory";
-		case LD_USERS_BAD_CFG:
-			return "Could not load user profile. Check serial output";
-		case LD_USERS_INDEX_OUT_OF_BOUNDS:
-			return "Attempted to index into a user profile that was out of bounds";
-		case LD_USERS_OK:
-			return NO_ERR_STR;
+	case LD_USERS_BAD_DIR:
+		return "There was an unexpected file in the `/usr` directory";
+	case LD_USERS_BAD_CFG:
+		return "Could not load user profile. Check serial output";
+	case LD_USERS_INDEX_OUT_OF_BOUNDS:
+		return "Attempted to index into a user profile that was out of bounds";
+	case LD_USERS_OK:
+		return NO_ERR_STR;
 	}
 	return "ld_users_err_msg: Invalid Error Code";
 }
