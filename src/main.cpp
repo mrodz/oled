@@ -49,15 +49,8 @@ void capacitive_touch_driver(lv_indev_drv_t *indev_driver, lv_indev_data_t *data
 	else
 	{
 		data->state = LV_INDEV_STATE_PR;
-
 		data->point.x = touchX;
 		data->point.y = touchY;
-
-		Serial.print("Data x ");
-		Serial.println(touchX);
-
-		Serial.print("Data y ");
-		Serial.println(touchY);
 	}
 }
 
@@ -66,21 +59,22 @@ App app = App();
 void ui_main(lv_obj_t *screen)
 {
 	static lv_style_t style;
-    lv_style_init(&style);
-    lv_style_set_flex_flow(&style, LV_FLEX_FLOW_ROW_WRAP);
-    lv_style_set_flex_main_place(&style, LV_FLEX_ALIGN_SPACE_AROUND);
+	lv_style_init(&style);
+	lv_style_set_flex_flow(&style, LV_FLEX_FLOW_ROW_WRAP);
+	lv_style_set_flex_main_place(&style, LV_FLEX_ALIGN_SPACE_AROUND);
 	lv_style_set_flex_track_place(&style, LV_FLEX_ALIGN_CENTER);
-    lv_style_set_layout(&style, LV_LAYOUT_FLEX);
+	lv_style_set_layout(&style, LV_LAYOUT_FLEX);
 
-	lv_obj_t * signin_row = lv_obj_create(screen);
+	lv_obj_t *signin_row = lv_obj_create(screen);
 
 	lv_obj_set_size(signin_row, 750, 400);
-    lv_obj_center(signin_row);
+	lv_obj_center(signin_row);
 	lv_obj_add_style(signin_row, &style, 0);
 
 	User *dst;
 
-	for (int i = 0; i < app.profile_count(); i++) {
+	for (int i = 0; i < app.profile_count(); i++)
+	{
 		(void)app.get_profile(i, &dst);
 		(void)user_profile(signin_row, dst);
 	}
@@ -171,8 +165,7 @@ void setup(void)
 
 	ui_main(screen);
 
-end:
-	;
+end:;
 }
 
 void loop(void)

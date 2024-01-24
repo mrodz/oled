@@ -5,7 +5,7 @@
 
 class User
 {
-	char * name;
+	char *name;
 
 public:
 	User();
@@ -13,10 +13,12 @@ public:
 	virtual ~User();
 
 	bool exists() const;
-	const char * get_name() const;
+	const char *get_name() const;
 };
 
+#define PROFILE_EDIT_TITLE_BUF_LEN 64
+
 unsigned char *encrypt_any_length_string(const char *input, uint8_t *key, uint8_t *iv);
-lv_obj_t * user_profile(lv_obj_t *parent, const User * user);
+lv_obj_t *user_profile(lv_obj_t *parent, User *user);
 
 #endif

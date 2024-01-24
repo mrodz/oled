@@ -8,7 +8,7 @@
 
 #include "login.hpp"
 
-static const char * NO_ERR_STR = "no error";
+static const char *NO_ERR_STR = "no error";
 
 struct Position
 {
@@ -35,8 +35,10 @@ public:
 	void set_size(Dimension size);
 };
 
-class App {
+class App
+{
 	std::vector<User> profiles = {};
+
 public:
 	App();
 	bool add_profile(size_t index, User user);

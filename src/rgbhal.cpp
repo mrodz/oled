@@ -55,19 +55,20 @@ static Arduino_ESP32RGBPanel *rgbpanel = new Arduino_ESP32RGBPanel(
 	/* END channels */
 	HSYNC_POLARITY, HSYNC_FRONT_PORCH, HSYNC_PULSE_WIDTH, HSYNC_BACK_PORCH,
 	VSYNC_POLARITY, VSYNC_FRONT_PORCH, VSYNC_PULSE_WIDTH, VSYNC_BACK_PORCH,
-	PCLK_ACTIVE_NEG, PREFERRED_SPEED
-);
+	PCLK_ACTIVE_NEG, PREFERRED_SPEED);
 
 TFT_SmartDisplay_ESP32S3_RGB_LCD::TFT_SmartDisplay_ESP32S3_RGB_LCD(int16_t screen_width_px, int16_t screen_height_px)
 	: Arduino_RGB_Display(screen_width_px, screen_height_px, rgbpanel) {}
 
-bool TFT_SmartDisplay_ESP32S3_RGB_LCD::isUserTouching(int16_t *input_x, int16_t *input_y) {
+bool TFT_SmartDisplay_ESP32S3_RGB_LCD::isUserTouching(int16_t *input_x, int16_t *input_y)
+{
 	bool result = touch_touched(this->width(), this->height());
 
-	if (result) {
+	if (result)
+	{
 		*input_x = touch_last_x;
 		*input_y = touch_last_y;
 	}
-	
+
 	return result;
 }

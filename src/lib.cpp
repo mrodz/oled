@@ -14,7 +14,8 @@ void Component::set_size(Dimension size)
 
 App::App() = default;
 
-size_t App::profile_count() const {
+size_t App::profile_count() const
+{
 	return this->profiles.size();
 }
 
@@ -32,8 +33,10 @@ bool App::get_profile(size_t index, User **dst)
 	return true;
 }
 
-bool App::add_profile(size_t index, User user) {
-	if (index != this->profile_count()) {
+bool App::add_profile(size_t index, User user)
+{
+	if (index != this->profile_count())
+	{
 		return false;
 	}
 
