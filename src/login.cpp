@@ -73,10 +73,9 @@ bool User::exists() const
 	return this->name != nullptr;
 }
 
-static lv_style_t style_user_settings_modal;
 static lv_obj_t *mbox;
 
-void profile_edit_modal_cb(lv_event_t *event)
+static void profile_edit_modal_cb(lv_event_t *event)
 {
 	if (event->code == LV_EVENT_DELETE && event->target == mbox)
 	{
@@ -95,20 +94,19 @@ void profile_edit_modal_cb(lv_event_t *event)
 
 static char title[PROFILE_EDIT_TITLE_BUF_LEN];
 
-void profile_edit_click_cb(lv_event_t *event)
+static void profile_edit_click_cb(lv_event_t *event)
 {
 	if (event->code == LV_EVENT_CLICKED)
 	{
 		User *user = (User *)event->user_data;
 		/* Create a base object for the modal background */
 		lv_obj_t *obj = lv_obj_create(lv_scr_act());
-
+	
 		lv_obj_remove_style_all(obj);
-		lv_obj_add_style(obj, &style_user_settings_modal, 0);
 		lv_obj_set_pos(obj, 0, 0);
+		lv_obj_set_style_bg_color(obj, lv_color_black(), 0);
+		// lv_obj_set_style_opa(obj, LV_OPA_20, 0);
 		lv_obj_set_size(obj, LV_HOR_RES, LV_VER_RES);
-
-		static const char *btns[] = {""};
 
 		const char *src = user->exists() ? user->get_name() : "Empty Profile";
 
@@ -121,7 +119,7 @@ void profile_edit_click_cb(lv_event_t *event)
 		Serial.print("@@@ ");
 		Serial.println(title);
 
-		mbox = lv_msgbox_create(obj, title, "", btns, true);
+		mbox = lv_msgbox_create(obj, title, "", nullptr, true);
 
 		lv_obj_set_align(mbox, LV_ALIGN_CENTER);
 		lv_obj_add_event_cb(
@@ -135,11 +133,8 @@ void profile_edit_click_cb(lv_event_t *event)
 	}
 }
 
-void profile_edit_button(lv_obj_t *parent, User *user)
+static void profile_edit_button(lv_obj_t *parent, User *user)
 {
-	lv_style_init(&style_user_settings_modal);
-	lv_style_set_bg_color(&style_user_settings_modal, lv_color_black());
-
 	lv_obj_t *btn = lv_btn_create(parent);
 	lv_obj_set_style_bg_color(btn, lv_color_black(), 0);
 	lv_obj_set_style_align(btn, LV_ALIGN_TOP_RIGHT, 0);
@@ -188,4 +183,88 @@ lv_obj_t *user_profile(lv_obj_t *parent, User *user)
 	profile_edit_button(profile_container, user);
 
 	return profile_container;
+}
+
+static lv_obj_t *add_user_menu;
+
+void add_user_modal_cb(lv_event_t * event) {
+	if (event->code == LV_EVENT_DELETE && event->target == add_user_menu)
+	{
+		/* Delete the parent modal background */
+		lv_obj_del_async(lv_obj_get_parent(add_user_menu));
+		add_user_menu = nullptr; /* happens before object is actually deleted! */
+	}
+	else if (event->code == LV_EVENT_VALUE_CHANGED)
+	{
+		Serial.printf("Button: %s\n", lv_msgbox_get_active_btn_text(event->current_target));
+
+		/* A button was clicked */
+		lv_msgbox_close(add_user_menu);
+	}
+}
+
+void add_user_cb(lv_event_t * event) {
+	if (event->code == LV_EVENT_CLICKED) {
+		/* Create a base object for the modal background */
+		lv_obj_t *obj = lv_obj_create(lv_scr_act());
+
+		lv_obj_remove_style_all(obj);
+		lv_obj_set_pos(obj, 0, 0);
+		lv_obj_set_style_bg_color(obj, lv_color_black(), 0);
+		// lv_obj_set_style_opa(obj, LV_OPA_20, 0);
+		lv_obj_set_size(obj, LV_HOR_RES, LV_VER_RES);
+
+		add_user_menu = lv_msgbox_create(obj, "Create User", "", nullptr, true);
+
+		lv_obj_set_align(add_user_menu, LV_ALIGN_CENTER);
+		lv_obj_add_event_cb(
+			add_user_menu, add_user_modal_cb,
+			LV_EVENT_ALL, nullptr);
+
+		lv_obj_t *b = lv_btn_create(add_user_menu);
+
+		lv_obj_t *bl = lv_label_create(b);
+		lv_label_set_text(bl, "cool");
+	}
+}
+
+lv_obj_t *add_user_button(lv_obj_t *parent)
+{
+	static lv_style_t style;
+	lv_style_init(&style);
+	lv_style_set_flex_flow(&style, LV_FLEX_FLOW_ROW_WRAP);
+	lv_style_set_flex_main_place(&style, LV_FLEX_ALIGN_SPACE_AROUND);
+	lv_style_set_flex_track_place(&style, LV_FLEX_ALIGN_CENTER);
+	lv_style_set_pad_all(&style, 20);
+	lv_style_set_layout(&style, LV_LAYOUT_FLEX);
+
+	lv_obj_t *container = lv_obj_create(parent);
+
+	lv_obj_remove_style_all(container);
+	lv_obj_add_style(container, &style, 0);
+	lv_obj_set_size(container, 150, 250);
+
+	lv_obj_t *root_button = lv_btn_create(container);
+
+	lv_obj_add_event_cb(root_button, add_user_cb, LV_EVENT_ALL, nullptr);
+
+	lv_obj_t *label = lv_label_create(root_button);
+	lv_label_set_text(label, LV_SYMBOL_PLUS);
+
+	lv_obj_center(label);
+
+	lv_obj_set_style_pad_all(root_button, 40, 0);
+	lv_obj_set_style_radius(root_button, LV_RADIUS_CIRCLE, 0);
+	lv_obj_set_style_align(root_button, LV_ALIGN_CENTER, 0);
+
+	lv_obj_center(root_button);
+
+	lv_obj_t *description = lv_label_create(container);
+
+	lv_label_set_text(description, "Add user");
+	lv_obj_set_style_pad_top(description, 20, 0);
+
+	lv_obj_center(container);
+
+	return container;
 }

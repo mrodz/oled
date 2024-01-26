@@ -78,6 +78,8 @@ void ui_main(lv_obj_t *screen)
 		(void)app.get_profile(i, &dst);
 		(void)user_profile(signin_row, dst);
 	}
+
+	(void)add_user_button(signin_row);
 }
 
 void ui_error(lv_obj_t *screen, const char *message)
@@ -126,7 +128,7 @@ void setup(void)
 
 	lv_log_register_print_cb(debug_driver); /* register print function for debugging */
 
-	lv_disp_draw_buf_init(&draw_buf, buf, NULL, SCREEN_WIDTH_PX * 10);
+	lv_disp_draw_buf_init(&draw_buf, buf, nullptr, SCREEN_WIDTH_PX * 10);
 
 	static lv_disp_drv_t disp_drv;
 	lv_disp_drv_init(&disp_drv);
