@@ -5,6 +5,10 @@
 
 #include <lvgl.h>
 #include <vector>
+#include <string>
+#include <memory>
+#include <WiFi.h>
+#include <HTTPClient.h>
 
 #include "login.hpp"
 
@@ -44,6 +48,20 @@ public:
 	bool add_profile(size_t index, User user);
 	bool get_profile(size_t index, User **dst);
 	size_t profile_count() const;
+};
+
+class WifiManager
+{
+private:
+	std::string ssid;
+	std::string password;
+	bool started;
+
+	WifiManager(std::string ssid, std::string password);
+public:
+	void set_ssid(std::string ssid);
+	void set_password(std::string password);
+	wl_status_t ensure_connection(const int timeout_ms = -1, const int delay_ms = 200);
 };
 
 #endif // #ifndef OLED_LIB_HPP

@@ -65,21 +65,21 @@ void ui_main(lv_obj_t *screen)
 	lv_style_set_flex_track_place(&style, LV_FLEX_ALIGN_CENTER);
 	lv_style_set_layout(&style, LV_LAYOUT_FLEX);
 
-	lv_obj_t *signin_row = lv_obj_create(screen);
+	// lv_obj_t *signin_row = lv_obj_create(screen);
 
-	lv_obj_set_size(signin_row, 750, 400);
-	lv_obj_center(signin_row);
-	lv_obj_add_style(signin_row, &style, 0);
+	// lv_obj_set_size(signin_row, 750, 400);
+	// lv_obj_center(signin_row);
+	// lv_obj_add_style(signin_row, &style, 0);
 
-	User *dst;
+	// User *dst;
 
-	for (int i = 0; i < app.profile_count(); i++)
-	{
-		(void)app.get_profile(i, &dst);
-		(void)user_profile(signin_row, dst);
-	}
+	// for (int i = 0; i < app.profile_count(); i++)
+	// {
+	// 	(void)app.get_profile(i, &dst);
+	// 	(void)user_profile(signin_row, dst);
+	// }
 
-	(void)add_user_button(signin_row);
+	// (void)add_user_button(signin_row);
 }
 
 void ui_error(lv_obj_t *screen, const char *message)
