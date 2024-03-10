@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef OLED_SDHAL_HPP
 #define OLED_SDHAL_HPP
 

@@ -1,10 +1,16 @@
+#pragma once
+
 #ifndef SPOTIFY_HPP
 #define SPOTIFY_HPP
+
+#include <lvgl.h>
 
 #include <array>
 #include <ctime>
 #include <string>
 #include <memory>
+
+#include "lib.hpp"
 
 #define MAX_SONG_NAME_LEN 31
 #define MAX_ARTIST_NAME_LEN 31
@@ -31,18 +37,27 @@ public:
 	bool expired();
 };
 
+#define ERR_NO_INTERNET 503
+
+enum token_refresh_result_t {
+	TOKEN_REFRESH_OK,
+	TOKEN_REFRESH_ERR_HTTPS_APPLICATION,
+	TOKEN_REFRESH_ERR_NO_INTERNET = ERR_NO_INTERNET
+};
+
 class SpotifyManager
 {
 private:
 	std::string client_id;
 	std::string client_secret;
 	std::unique_ptr<Session> session;
-	WifiManager& manager;
+	wifi::WifiManager& manager;
 
 public:
-	SpotifyManager(std::string client_id, std::string client_secret, WifiManager& manager);
+	SpotifyManager(std::string client_id, std::string client_secret, wifi::WifiManager& manager);
 
-	void refresh_token();
+	token_refresh_result_t refresh_token();
 };
+
 
 #endif // #ifndef SPOTIFY_HPP

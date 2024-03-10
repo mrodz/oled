@@ -45,7 +45,8 @@
 		"limits": "cpp",
 		"stdexcept": "cpp",
 		"cinttypes": "cpp",
-		"typeinfo": "cpp"
+		"typeinfo": "cpp",
+		"cstring": "cpp"
 	},
 	"C_Cpp.default.compilerPath": "C:/Users/mateo/.platformio/packages/toolchain-xtensa-esp32s3/bin/xtensa-esp32s3-elf-gcc.exe"
 }

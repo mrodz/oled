@@ -9,7 +9,7 @@ Song::Song(std::string _name, std::string _artist) : name(_name), artist(_artist
 
 Session::Session(std::string _access_token, time_t _start) : access_token(_access_token), start(_start) {}
 
-SpotifyManager::SpotifyManager(std::string _client_id, std::string _client_secret, WifiManager &_manager) : client_id(_client_id), client_secret(_client_secret), manager(_manager) {}
+SpotifyManager::SpotifyManager(std::string _client_id, std::string _client_secret, wifi::WifiManager &_manager) : client_id(_client_id), client_secret(_client_secret), manager(_manager) {}
 
 static const char SPOTIFY_ROOT_CERT[] =
 	"-----BEGIN CERTIFICATE-----\n"
@@ -52,25 +52,44 @@ static const char SPOTIFY_ROOT_CERT[] =
 	"eopoyfdMjajyt/H63g==\n"
 	"-----END CERTIFICATE-----\n";
 
-void SpotifyManager::refresh_token()
+token_refresh_result_t SpotifyManager::refresh_token()
 {
-	(void)this->manager.ensure_connection();
+	wl_status_t status = this->manager.ensure_connection();
+	if (status != WL_CONNECTED) {
+		return TOKEN_REFRESH_ERR_NO_INTERNET;
+	}
 
 	static const char SPOTIFY_URL[] = "https://accounts.spotify.com/api/token";
 
-	WiFiClientSecure client;
-	client.setCACert(SPOTIFY_ROOT_CERT);
 	HTTPClient https;
 
-	WiFiClientSecure &c = client;
+	token_refresh_result_t exit_code = TOKEN_REFRESH_OK;
 
-	if (https.begin(c, SPOTIFY_URL))
+	if (https.begin(SPOTIFY_URL, SPOTIFY_ROOT_CERT))
 	{
-		int httpCode = https.GET();
+		https.addHeader("Content-Type", "application/x-www-form-urlencoded");
+
+		std::string payload = "grant_type=client_credentials&client_id=" + this->client_id + "&client_secret=" + this->client_secret;
+
+		int response = https.POST(payload.c_str());
+
+		if (response < 0) {
+			exit_code = TOKEN_REFRESH_ERR_HTTPS_APPLICATION;
+			Serial.printf("Error: posting returned a non-http error code, which means the library encountered an error (error code %d).%n", response);
+			goto cleanup;
+		}
+
+		Serial.println(https.getString());
 	} else {
+		exit_code = TOKEN_REFRESH_ERR_HTTPS_APPLICATION;
+		Serial.println("Error: could not begin HTTPS transaction.");
 		goto cleanup;
 	}
 
 cleanup:
 	https.end();
+
+	Serial.printf("Exiting token refresh with status code %d", exit_code);
+
+	return exit_code;
 }

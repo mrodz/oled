@@ -2,11 +2,11 @@
 #include <Arduino_GFX_Library.h>
 #include <lvgl.h>
 
+#include "lib.hpp"
 #include "rgbhal.hpp"
 #include "sdhal.hpp"
 #include "touchhal.hpp"
 #include "login.hpp"
-#include "components/counter.hpp"
 
 #define TFT_BL 2
 #define SERIAL_BAUD_RATE 115200
@@ -58,12 +58,15 @@ App app = App();
 
 void ui_main(lv_obj_t *screen)
 {
-	static lv_style_t style;
-	lv_style_init(&style);
-	lv_style_set_flex_flow(&style, LV_FLEX_FLOW_ROW_WRAP);
-	lv_style_set_flex_main_place(&style, LV_FLEX_ALIGN_SPACE_AROUND);
-	lv_style_set_flex_track_place(&style, LV_FLEX_ALIGN_CENTER);
-	lv_style_set_layout(&style, LV_LAYOUT_FLEX);
+	static wifi::WifiManager wifi;
+
+	wifi::wifi_modal_open_btn(screen, const_cast<wifi::WifiManager &>(wifi));
+	// static lv_style_t style;
+	// lv_style_init(&style);
+	// lv_style_set_flex_flow(&style, LV_FLEX_FLOW_ROW_WRAP);
+	// lv_style_set_flex_main_place(&style, LV_FLEX_ALIGN_SPACE_AROUND);
+	// lv_style_set_flex_track_place(&style, LV_FLEX_ALIGN_CENTER);
+	// lv_style_set_layout(&style, LV_LAYOUT_FLEX);
 
 	// lv_obj_t *signin_row = lv_obj_create(screen);
 
@@ -147,27 +150,27 @@ void setup(void)
 
 	lv_obj_t *screen = lv_scr_act();
 
-	{ // scoped to allow goto
-		sd_init_err sdcard_err = sdcard_init();
+	// { // scoped to allow goto
+	// 	sd_init_err sdcard_err = sdcard_init();
 
-		if (sdcard_err != SD_INIT_OK)
-		{
-			ui_error(screen, sd_init_err_msg(sdcard_err));
-			goto end;
-		}
+	// 	if (sdcard_err != SD_INIT_OK)
+	// 	{
+	// 		ui_error(screen, sd_init_err_msg(sdcard_err));
+	// 		goto end;
+	// 	}
 
-		ld_users_err user_setup_err = load_users(&app);
+	// 	ld_users_err user_setup_err = load_users(&app);
 
-		if (user_setup_err != LD_USERS_OK)
-		{
-			ui_error(screen, ld_users_err_msg(user_setup_err));
-			goto end;
-		}
-	}
+	// 	if (user_setup_err != LD_USERS_OK)
+	// 	{
+	// 		ui_error(screen, ld_users_err_msg(user_setup_err));
+	// 		goto end;
+	// 	}
+	// }
 
 	ui_main(screen);
 
-end:;
+	// end:;
 }
 
 void loop(void)
